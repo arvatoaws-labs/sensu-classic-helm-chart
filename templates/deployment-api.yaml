@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sensu-classic.fullname" . }}-api
+  labels:
+    app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+    helm.sh/chart: {{ include "sensu-classic.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: api
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api
+      {{- if .Values.api.labels }}
+        ## Custom pod labels
+        {{- range $key, $value := .Values.api.labels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      annotations:
+      {{- if .Values.api.annotations }}
+        ## Custom pod annotations
+        {{- range $key, $value := .Values.api.annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - api
+          env:
+            - name: API_HOST
+              value: "localhost"
+            - name: API_PORT
+              value: "4567"
+            - name: LOG_LEVEL
+              value: "warn"
+            - name: REDIS_HOST
+            {{- if .Values.redis.enabled }}
+              value: {{ template "sensu-classic.redis.fullname" . }}-master
+            {{- else }}
+              value: {{ .Values.externalRedis.host | quote }}
+            {{- end }}
+            - name: REDIS_DB
+            {{- if .Values.redis.enabled }}
+              value: "0"
+            {{- else }}
+              value: {{ .Values.externalRedis.db | quote }}
+            {{- end }}
+            - name: REDIS_PORT
+            {{- if .Values.redis.enabled }}
+              value: {{ .Values.redis.redisPort | quote }}
+            {{- else }}
+              value: {{ .Values.externalRedis.port | quote }}
+            {{- end }}
+            - name: SNS_REGION
+              value: "{{ .Values.sns.region }}"
+            - name: SNSSQS_CONSUMING_SQS_QUEUE_URL
+              value: "{{ .Values.snssqs.consuming_sqs_queue_url }}"
+            - name: SNSSQS_MAX_NUMBER_OF_MESSAGES
+              value: "{{ .Values.snssqs.max_number_of_messages }}"
+            - name: SNSSQS_PUBLISHING_SNS_TOPIC_ARN
+              value: "{{ .Values.snssqs.publishing_sns_topic_arn }}"
+            - name: SNSSQS_REGION
+              value: "{{ .Values.snssqs.region }}"
+            - name: SNSSQS_WAIT_TIME_SECONDS
+              value: "{{ .Values.snssqs.wait_time_seconds }}"
+            - name: TRANSPORT_NAME
+              value: "snssqs"
+          ports:
+            - name: http
+              containerPort: 4567
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          resources:
+            {{- toYaml .Values.api.resources | nindent 12 }}
+      {{- with .Values.api.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.api.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.api.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

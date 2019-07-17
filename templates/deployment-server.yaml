@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "sensu-classic.fullname" . }}-server
+  labels:
+    app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+    helm.sh/chart: {{ include "sensu-classic.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: server
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "sensu-classic.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      {{- if .Values.server.labels }}
+        ## Custom pod labels
+        {{- range $key, $value := .Values.server.labels }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }}
+      annotations:
+      {{- if .Values.server.annotations }}
+        ## Custom pod annotations
+        {{- range $key, $value := .Values.server.annotations }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+      {{- end }} 
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - server
+          env:
+            - name: API_HOST
+              value: "sensu"
+              value: {{ template "sensu-classic.fullname" . }}              
+            - name: API_PORT
+              value: "4567"
+            - name: LOG_LEVEL
+              value: "warn"
+            - name: REDIS_HOST
+            {{- if .Values.redis.enabled }}
+              value: {{ template "sensu-classic.redis.fullname" . }}-master
+            {{- else }}
+              value: {{ .Values.externalRedis.host | quote }}
+            {{- end }}
+            - name: REDIS_DB
+            {{- if .Values.redis.enabled }}
+              value: "0"
+            {{- else }}
+              value: {{ .Values.externalRedis.db | quote }}
+            {{- end }}
+            - name: REDIS_PORT
+            {{- if .Values.redis.enabled }}
+              value: {{ .Values.redis.redisPort | quote }}
+            {{- else }}
+              value: {{ .Values.externalRedis.port | quote }}
+            {{- end }}
+            - name: SNS_REGION
+              value: "{{ .Values.sns.region }}"
+            - name: SNS_TOPIC_ARN
+              value: "{{ .Values.sns.topic_arn }}"
+            - name: SNSSQS_CONSUMING_SQS_QUEUE_URL
+              value: "{{ .Values.snssqs.consuming_sqs_queue_url }}"
+            - name: SNSSQS_MAX_NUMBER_OF_MESSAGES
+              value: "{{ .Values.snssqs.max_number_of_messages }}"
+            - name: SNSSQS_PUBLISHING_SNS_TOPIC_ARN
+              value: "{{ .Values.snssqs.publishing_sns_topic_arn }}"
+            - name: SNSSQS_REGION
+              value: "{{ .Values.snssqs.region }}"
+            - name: SNSSQS_WAIT_TIME_SECONDS
+              value: "{{ .Values.snssqs.wait_time_seconds }}"
+            - name: TRANSPORT_NAME
+              value: "snssqs"
+            - name: ARGOS_API_KEY
+              value: "{{ .Values.argos.api_key }}"
+            - name: ARGOS_URL
+              value: "{{ .Values.argos.url }}"
+            - name: ARGOS_LIVE
+              value: "{{ .Values.argos.live }}"
+            - name: ARGOS_DEBUG
+              value: "{{ .Values.argos.debug }}"      
+            - name: ARGOS_OP_TOOL_KIT
+              value: "{{ .Values.argos.op_tool_kit }}"
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+      {{- with .Values.server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
