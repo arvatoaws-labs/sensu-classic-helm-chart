@@ -62,6 +62,8 @@ redis:
   cluster:
     enabled: false
     slaveCount: 0
+  metrics:
+    enabled: true
 
 externalRedis:
   host: redis
