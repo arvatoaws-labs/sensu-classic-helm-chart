@@ -33,6 +33,7 @@ api:
   nodeSelector: {}
   tolerations: []
   affinity: {}
+  logLevel: warn
 server:
   annotations: {}
   labels: {}
@@ -50,7 +51,7 @@ server:
   nodeSelector: {}
   tolerations: []
   affinity: {}
-
+  logLevel: warn
 redis:
   enabled: true
   usePassword: false

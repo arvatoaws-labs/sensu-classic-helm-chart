@@ -47,7 +47,7 @@ spec:
             - name: API_PORT
               value: "4567"
             - name: LOG_LEVEL
-              value: "warn"
+              value: {{ .Values.server.logLevel | quote }}
             - name: REDIS_HOST
             {{- if .Values.redis.enabled }}
               value: {{ template "sensu-classic.redis.fullname" . }}-master
