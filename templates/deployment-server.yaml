@@ -91,6 +91,8 @@ spec:
               value: "{{ .Values.argos.debug }}"      
             - name: ARGOS_OP_TOOL_KIT
               value: "{{ .Values.argos.op_tool_kit }}"
+            - name: ARGOS_SIMULATE
+              value: "{{ .Values.argos.simulate }}"
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
       {{- with .Values.server.nodeSelector }}
