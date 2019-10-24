@@ -93,6 +93,8 @@ spec:
               value: "{{ .Values.argos.op_tool_kit }}"
             - name: ARGOS_SIMULATE
               value: "{{ .Values.argos.simulate }}"
+            - name: ARGOS_REPORT_ONLY_HIGH_TICKETS
+              value: "{{ .Values.argos.report_only_high_tickets }}"
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
       {{- with .Values.server.nodeSelector }}
