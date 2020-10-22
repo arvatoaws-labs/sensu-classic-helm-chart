@@ -35,6 +35,9 @@ spec:
         {{- end }}
       {{- end }}
     spec:
+      {{- if .Values.serviceAccount }}
+      serviceAccountName: {{ .Values.serviceAccount }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -82,8 +85,8 @@ spec:
               value: "snssqs"
           ports:
             - name: http
-              containerPort: 4567
               protocol: TCP
+              containerPort: 4567
           livenessProbe:
             httpGet:
               path: /health

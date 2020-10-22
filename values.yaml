@@ -16,6 +16,8 @@ service:
   type: ClusterIP
   port: 4567
 
+# serviceAccount: ""
+
 api:
   annotations: {}
   labels: {}
