@@ -16,8 +16,6 @@ service:
   type: ClusterIP
   port: 4567
 
-# serviceAccount: ""
-
 api:
   annotations: {}
   labels: {}
@@ -36,6 +34,7 @@ api:
   tolerations: []
   affinity: {}
   logLevel: warn
+  # serviceAccount: ""
 server:
   annotations: {}
   labels: {}
@@ -54,6 +53,7 @@ server:
   tolerations: []
   affinity: {}
   logLevel: warn
+  # serviceAccount: ""
 redis:
   enabled: true
   usePassword: false

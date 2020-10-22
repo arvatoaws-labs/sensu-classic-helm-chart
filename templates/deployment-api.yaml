@@ -35,8 +35,8 @@ spec:
         {{- end }}
       {{- end }}
     spec:
-      {{- if .Values.serviceAccount }}
-      serviceAccountName: {{ .Values.serviceAccount }}
+      {{- if .Values.api.serviceAccount }}
+      serviceAccountName: {{ .Values.api.serviceAccount }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
