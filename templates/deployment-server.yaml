@@ -101,10 +101,18 @@ spec:
               value: "{{ .Values.argos.report_only_high_tickets }}"
           resources:
             {{- toYaml .Values.server.resources | nindent 12 }}
+          volumeMounts:
+          - name: ruby-handler
+            mountPath: /etc/sensu/handlers/ruby/sns.rb
+            subPath: sns.rb
       {{- with .Values.server.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: ruby-handler
+        configMap:
+          name: {{ include "sensu-classic.fullname" . }}-ruby-handler
     {{- with .Values.server.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

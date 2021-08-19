@@ -99,10 +99,18 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.api.resources | nindent 12 }}
+          volumeMounts:
+          - name: ruby-handler
+            mountPath: /etc/sensu/handlers/ruby/sns.rb
+            subPath: sns.rb
       {{- with .Values.api.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: ruby-handler
+        configMap:
+          name: {{ include "sensu-classic.fullname" . }}-ruby-handler
     {{- with .Values.api.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
