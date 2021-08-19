@@ -46,7 +46,6 @@ spec:
           - server
           env:
             - name: API_HOST
-              value: "sensu"
               value: {{ template "sensu-classic.fullname" . }}              
             - name: API_PORT
               value: "4567"
