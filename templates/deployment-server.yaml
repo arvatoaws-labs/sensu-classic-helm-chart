@@ -113,6 +113,7 @@ spec:
       - name: ruby-handler
         configMap:
           name: {{ include "sensu-classic.fullname" . }}-ruby-handler
+          defaultMode: 0777
     {{- with .Values.server.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
