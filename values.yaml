@@ -94,8 +94,8 @@ snssqs:
 
 ingress:
   enabled: false
+  # className: traefik
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   paths: []
   hosts:
